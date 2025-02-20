@@ -8,10 +8,10 @@ import { Navbar } from "@/components/nav/navbar"
 export function Hero() {
   const router = useRouter()
 
-  const scrollToCategories = () => {
-    const categoriesSection = document.getElementById('categories')
-    if (categoriesSection) {
-      categoriesSection.scrollIntoView({ behavior: 'smooth' })
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features')
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
@@ -43,10 +43,12 @@ export function Hero() {
                   <div className="relative overflow-hidden rounded-full py-1.5 px-4 text-sm leading-6 ring-1 ring-gray-200/10 hover:ring-gray-200/20 bg-white/10">
                     <span className="text-gray-100">
                       Start preparing for your military career.{" "}
-                      <a href="#features" className="font-semibold text-white">
-                        <span className="absolute inset-0" aria-hidden="true" />
+                      <button 
+                        onClick={scrollToFeatures}
+                        className="font-semibold text-white cursor-pointer"
+                      >
                         Learn more <span aria-hidden="true">&rarr;</span>
-                      </a>
+                      </button>
                     </span>
                   </div>
                 </div>
