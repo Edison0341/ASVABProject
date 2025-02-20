@@ -16,7 +16,7 @@ A modern web application designed to help users prepare for the Armed Services V
 - **Framework:** Next.js 14 (App Router)
 - **Styling:** Tailwind CSS
 - **UI Components:** shadcn/ui
-- **Authentication:** Clerk
+- **Authentication:** Supabase Auth
 - **Database:** Supabase
 
 ## Getting Started
