@@ -6,9 +6,20 @@ import { Input } from "@/components/ui/input"
 import { MessageCircle, X, Send, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// Animated typing indicator component
+const TypingIndicator = () => {
+  return (
+    <div className="flex items-center space-x-1">
+      <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "0ms" }}></div>
+      <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "300ms" }}></div>
+      <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: "600ms" }}></div>
+    </div>
+  )
+}
+
 export function ChatBox() {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([])
+  const [messages, setMessages] = useState<Array<{text: string, isUser: boolean, isTyping?: boolean}>>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -29,6 +40,9 @@ export function ChatBox() {
     setMessages(prev => [...prev, { text: userMessage, isUser: true }])
     setInput("")
     setIsLoading(true)
+    
+    // Add typing indicator
+    setMessages(prev => [...prev, { text: "", isUser: false, isTyping: true }])
 
     try {
       const response = await fetch('http://localhost:5678/webhook/asvabbot', {
@@ -59,6 +73,9 @@ export function ChatBox() {
         throw new Error('Failed to parse response')
       }
 
+      // Remove the typing indicator
+      setMessages(prev => prev.slice(0, -1))
+
       // Handle both array format and direct object format
       if (Array.isArray(data)) {
         if (data.length > 0 && data[0].output) {
@@ -79,6 +96,10 @@ export function ChatBox() {
       }
     } catch (error: unknown) {
       console.error('Error details:', error)
+      
+      // Remove the typing indicator
+      setMessages(prev => prev.slice(0, -1))
+      
       setMessages(prev => [...prev, { 
         text: error instanceof Error && error.message === 'Failed to parse response'
           ? "I received an invalid response format. Please try again."
@@ -157,7 +178,7 @@ export function ChatBox() {
                         : "bg-muted"
                     )}
                   >
-                    {msg.text}
+                    {msg.isTyping ? <TypingIndicator /> : msg.text}
                   </div>
                 </div>
               ))}
