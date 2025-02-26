@@ -22,6 +22,8 @@ export function useQuiz(quizId: string) {
   const [quizStarted, setQuizStarted] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [sessionLoaded, setSessionLoaded] = useState(false)
+  const [hasMissingOptions, setHasMissingOptions] = useState(false)
+  const [hasDuplicateQuestions, setHasDuplicateQuestions] = useState(false)
 
   // Get user session - separate from quiz loading
   useEffect(() => {
@@ -164,7 +166,39 @@ export function useQuiz(quizId: string) {
         }
 
         console.log('Quiz data fetched:', quizData)
+        
+        // Check if any questions are missing options
+        const hasQuestionsWithoutOptions = quizData.questions.some(
+          (q: any) => !q.options || q.options.length === 0
+        )
+        
+        // Check for duplicate questions
+        const questionTexts = new Map<string, number>()
+        let duplicatesFound = false
+        
+        quizData.questions.forEach((q: any) => {
+          const text = q.question_text.trim()
+          if (questionTexts.has(text)) {
+            questionTexts.set(text, questionTexts.get(text)! + 1)
+            duplicatesFound = true
+          } else {
+            questionTexts.set(text, 1)
+          }
+        })
+        
+        if (duplicatesFound) {
+          console.log('Duplicate questions found in quiz')
+          questionTexts.forEach((count, text) => {
+            if (count > 1) {
+              console.log(`Question "${text.substring(0, 30)}..." appears ${count} times`)
+            }
+          })
+        }
+        
+        setHasDuplicateQuestions(duplicatesFound)
+        setHasMissingOptions(hasQuestionsWithoutOptions)
         setQuiz(quizData as Quiz)
+        
         if (quizData.time_limit) {
           setTimeRemaining(quizData.time_limit * 60)
         }
@@ -201,13 +235,15 @@ export function useQuiz(quizId: string) {
   // Handle answer submission
   const submitAnswer = async (questionId: string, optionId: string) => {
     try {
+      // Always update local state regardless of authentication
+      setUserAnswers(prev => ({ ...prev, [questionId]: optionId }))
+      
+      // If no user ID, just track answers locally without saving to database
       if (!userId) {
-        console.error('No user ID found when submitting answer')
-        throw new Error('Please sign in to submit answers')
+        console.log('Submitting answer in guest mode (no user ID):', { questionId, optionId })
+        return
       }
       
-      setUserAnswers(prev => ({ ...prev, [questionId]: optionId }))
-
       console.log('Submitting answer:', { questionId, optionId, userId })
       const { data: option, error: optionError } = await supabase
         .from('options')
@@ -256,18 +292,21 @@ export function useQuiz(quizId: string) {
   // Start the quiz
   const startQuiz = async () => {
     try {
-      if (!userId) {
-        console.error('No user ID found when starting quiz')
-        throw new Error('Please sign in to start the quiz')
-      }
-
       if (!quiz || !quiz.questions || quiz.questions.length === 0) {
         console.error('No quiz questions found')
         throw new Error('Quiz has no questions')
       }
       
-      console.log('Starting quiz for user:', userId)
+      // Set quiz as started regardless of user authentication
       setQuizStarted(true)
+      
+      // Only try to record progress if we have a userId
+      if (!userId) {
+        console.log('Starting quiz in guest mode (no user ID)')
+        return
+      }
+
+      console.log('Starting quiz for user:', userId)
 
       // Record quiz start in user_progress with the first question
       const firstQuestion = quiz.questions[0]
@@ -299,7 +338,7 @@ export function useQuiz(quizId: string) {
     } catch (err) {
       console.error('Error in startQuiz:', err)
       setError(err instanceof Error ? err.message : 'Failed to start quiz')
-      setQuizStarted(false)
+      // Don't reset quizStarted to false here, allow the quiz to continue in guest mode
     }
   }
 
@@ -324,13 +363,7 @@ export function useQuiz(quizId: string) {
         return
       }
       
-      if (!userId) {
-        console.error('No user ID found when submitting quiz')
-        throw new Error('Please sign in to submit the quiz')
-      }
-
-      console.log('Submitting quiz:', { quizId, userId })
-      // Calculate score
+      // Calculate score regardless of authentication
       const totalQuestions = quiz.questions.length
       let correctAnswers = 0
 
@@ -345,6 +378,14 @@ export function useQuiz(quizId: string) {
       }
 
       const score = Math.round((correctAnswers / totalQuestions) * 100)
+      
+      // If no user ID, just return the score without saving to database
+      if (!userId) {
+        console.log('Submitting quiz in guest mode (no user ID) with score:', score)
+        return score
+      }
+
+      console.log('Submitting quiz:', { quizId, userId })
       const completedAt = new Date().toISOString()
 
       // Update all progress entries for this quiz
@@ -374,9 +415,16 @@ export function useQuiz(quizId: string) {
 
   // Update the auto-start effect to wait for session
   useEffect(() => {
-    if (!quizStarted && !loading && quiz && sessionLoaded && userId) {
-      console.log('Auto-starting quiz with session loaded')
-      startQuiz()
+    if (!quizStarted && !loading && quiz && sessionLoaded) {
+      // Only auto-start if we have a userId or if we're in guest mode
+      if (userId) {
+        console.log('Auto-starting quiz with session loaded')
+        startQuiz()
+      } else {
+        console.log('User not logged in, setting quiz started without user progress')
+        // Just set the quiz as started without trying to record progress
+        setQuizStarted(true)
+      }
     }
   }, [quizStarted, loading, quiz, sessionLoaded, userId])
 
@@ -395,5 +443,8 @@ export function useQuiz(quizId: string) {
     startQuiz,
     submitQuiz,
     userId,
+    sessionLoaded,
+    hasMissingOptions,
+    hasDuplicateQuestions
   }
 }
