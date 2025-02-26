@@ -34,3 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# google-cloud
+/google-cloud-sdk/
+google-cloud-sdk-511.0.0-linux-x86_64.tar.gz
+
+# env files
+/root/ASVABProject/.env

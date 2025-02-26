@@ -22,6 +22,14 @@ CREATE TABLE categories (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Enable RLS for categories
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+
+-- Add policy to allow public read access to categories
+CREATE POLICY "Allow public read access to categories" ON categories
+    FOR SELECT
+    USING (true);
+
 CREATE TABLE quizzes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
@@ -34,6 +42,18 @@ CREATE TABLE quizzes (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Enable RLS for quizzes
+ALTER TABLE quizzes ENABLE ROW LEVEL SECURITY;
+
+-- Add policies for quizzes
+CREATE POLICY "Allow public read access to quizzes" ON quizzes
+    FOR SELECT
+    USING (true);
+
+CREATE POLICY "Allow insert access to quizzes" ON quizzes
+    FOR INSERT
+    WITH CHECK (true);
+
 CREATE TABLE questions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     quiz_id UUID REFERENCES quizzes(id) ON DELETE CASCADE,
@@ -44,6 +64,18 @@ CREATE TABLE questions (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Enable RLS for questions
+ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
+
+-- Add policies for questions
+CREATE POLICY "Allow public read access to questions" ON questions
+    FOR SELECT
+    USING (true);
+
+CREATE POLICY "Allow insert access to questions" ON questions
+    FOR INSERT
+    WITH CHECK (true);
+
 CREATE TABLE options (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     question_id UUID REFERENCES questions(id) ON DELETE CASCADE,
@@ -51,6 +83,18 @@ CREATE TABLE options (
     is_correct BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Enable RLS for options
+ALTER TABLE options ENABLE ROW LEVEL SECURITY;
+
+-- Add policies for options
+CREATE POLICY "Allow public read access to options" ON options
+    FOR SELECT
+    USING (true);
+
+CREATE POLICY "Allow insert access to options" ON options
+    FOR INSERT
+    WITH CHECK (true);
 
 CREATE TABLE user_progress (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -108,12 +152,18 @@ CREATE TRIGGER update_questions_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Insert sample ASVAB categories
-INSERT INTO categories (name, description) VALUES
-('Arithmetic Reasoning', 'Tests ability to solve basic arithmetic word problems'),
-('Word Knowledge', 'Tests ability to understand the meaning of words through synonyms'),
-('Paragraph Comprehension', 'Tests ability to obtain information from written passages'),
-('Mathematics Knowledge', 'Tests knowledge of mathematical concepts, principles and procedures');
+-- Insert sample ASVAB categories if they don't exist
+INSERT INTO categories (name, description)
+SELECT name, description
+FROM (VALUES
+    ('Arithmetic Reasoning', 'Tests ability to solve basic arithmetic word problems'),
+    ('Word Knowledge', 'Tests ability to understand the meaning of words through synonyms'),
+    ('Paragraph Comprehension', 'Tests ability to obtain information from written passages'),
+    ('Mathematics Knowledge', 'Tests knowledge of mathematical concepts, principles and procedures')
+) AS new_categories(name, description)
+WHERE NOT EXISTS (
+    SELECT 1 FROM categories WHERE name = new_categories.name
+);
 
 -- Insert sample ASVAB quiz
 INSERT INTO quizzes (category_id, title, description, difficulty_level, time_limit, passing_score) 

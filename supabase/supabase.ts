@@ -1,42 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from '@/types/database.types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+// Debug: Log environment variables (without exposing full key)
+console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase Key present:', !!supabaseKey);
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase environment variables:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseKey
+  });
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
-    storage: {
-      getItem: (key) => {
-        try {
-          const item = localStorage.getItem(key)
-          if (!item) return null
-          return JSON.parse(item)
-        } catch {
-          return null
-        }
-      },
-      setItem: (key, value) => {
-        try {
-          localStorage.setItem(key, JSON.stringify(value))
-        } catch (error) {
-          console.error('Error storing auth state:', error)
-        }
-      },
-      removeItem: (key) => {
-        try {
-          localStorage.removeItem(key)
-        } catch (error) {
-          console.error('Error removing auth state:', error)
-        }
-      },
-    },
-  },
-});
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
