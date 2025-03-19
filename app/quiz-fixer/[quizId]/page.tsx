@@ -1,12 +1,14 @@
+"use client"
+
 import { QuizFixer } from "@/components/quiz/quiz-fixer"
 
-interface QuizFixerPageProps {
+interface PageProps {
   params: {
     quizId: string
   }
 }
 
-export default function QuizFixerPage({ params }: QuizFixerPageProps) {
+export default function Page({ params }: PageProps) {
   return (
     <div className="container py-10">
       <h1 className="text-2xl font-bold mb-6 text-center">Quiz Fixer</h1>
