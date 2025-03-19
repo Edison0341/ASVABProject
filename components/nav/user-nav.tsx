@@ -5,10 +5,11 @@ import { supabase } from "@/supabase/supabase"
 import { Button } from "@/components/ui/button"
 import { LoginModal } from "@/components/auth/login-modal"
 import { useRouter } from 'next/navigation'
+import { User } from '@supabase/supabase-js'
 
 export function UserNav() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [userName, setUserName] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
 

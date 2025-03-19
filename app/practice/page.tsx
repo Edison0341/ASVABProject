@@ -7,16 +7,6 @@ import { useQuiz } from '@/hooks/use-quiz'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
-interface Question {
-  id: string
-  question_text: string
-  options: {
-    id: string
-    option_text: string
-    is_correct: boolean
-  }[]
-}
-
 export default function TestPage() {
   const router = useRouter()
   const searchParams = useSearchParams()

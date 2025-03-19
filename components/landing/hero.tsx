@@ -14,6 +14,13 @@ export function Hero() {
     }
   }
 
+  const scrollToCategories = () => {
+    const section = document.getElementById('categories-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   return (
     <div className="w-screen relative -mx-4 -mt-8 left-[calc(-50vw+50%+1rem)]" style={{ width: '100vw' }}>
       <Navbar />
@@ -94,12 +101,7 @@ export function Hero() {
                     variant="outline" 
                     size="lg"
                     className="text-[#000A1F] dark:text-white border-white hover:text-white"
-                    onClick={() => {
-                      const section = document.getElementById('categories-section');
-                      if (section) {
-                        section.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
+                    onClick={scrollToCategories}
                   >
                     View Categories
                   </Button>

@@ -158,7 +158,7 @@ export function ChatBox() {
         <div className="flex flex-col h-[calc(100%-8rem)] p-4 overflow-y-auto scrollbar-hide">
           {messages.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-8">
-              <p>Ask any questions about ASVAB test preparation, and I'll help you out!</p>
+              <p>Ask any questions about ASVAB test preparation, and I&apos;ll help you out!</p>
             </div>
           ) : (
             <div className="space-y-4">

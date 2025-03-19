@@ -3,10 +3,6 @@
 import { useState } from 'react'
 import { addCompleteQuiz, sampleQuizData } from '@/utils/quiz-manager'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
 
 export default function AddQuizPage() {
   const [loading, setLoading] = useState(false)
@@ -18,14 +14,16 @@ export default function AddQuizPage() {
     setMessage(null)
 
     try {
-      const result = await addCompleteQuiz(sampleQuizData)
-      if (result.success) {
-        setMessage({ type: 'success', text: `Quiz added successfully! ID: ${result.quizId}` })
-      } else {
-        setMessage({ type: 'error', text: result.error || 'Failed to add quiz' })
-      }
+      await addCompleteQuiz(sampleQuizData)
+      setMessage({ 
+        type: 'success', 
+        text: 'Sample quiz added successfully! You can now view it in the quizzes list.' 
+      })
     } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'An error occurred' })
+      setMessage({ 
+        type: 'error', 
+        text: error instanceof Error ? error.message : 'An unknown error occurred' 
+      })
     } finally {
       setLoading(false)
     }
@@ -57,7 +55,7 @@ export default function AddQuizPage() {
           <ol className="list-decimal list-inside space-y-2">
             <li>Click the button above to add a sample Mathematics Knowledge quiz</li>
             <li>Check the console for detailed logs of the process</li>
-            <li>If successful, you'll see a success message with the quiz ID</li>
+            <li>If successful, you&apos;ll see a success message with the quiz ID</li>
             <li>View the quiz data structure in <code>utils/quiz-manager.ts</code></li>
             <li>Use the <code>addCompleteQuiz</code> function to add your own quizzes</li>
           </ol>

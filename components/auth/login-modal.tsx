@@ -41,7 +41,7 @@ export function LoginModal() {
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -56,7 +56,7 @@ export function LoginModal() {
         alert("Check your email for the confirmation link!")
         setOpen(false)
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
@@ -66,8 +66,8 @@ export function LoginModal() {
         router.push('/')
         router.refresh()
       }
-    } catch (error: any) {
-      setError(error.message)
+    } catch (error: Error | unknown) {
+      setError(error instanceof Error ? error.message : 'An unknown error occurred')
     } finally {
       setLoading(false)
     }

@@ -1,12 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Navbar } from '@/components/nav/navbar'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Trophy, Target, Clock, ArrowRight } from 'lucide-react'
+import { Trophy, Target } from 'lucide-react'
 
 export default function ResultsPage() {
   const router = useRouter()
@@ -67,8 +65,8 @@ export default function ResultsPage() {
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
                 {isPassing
-                  ? 'Great job! You\'ve demonstrated a good understanding of the material.'
-                  : 'Keep practicing! You\'re making progress.'}
+                  ? 'Great job! You&apos;ve demonstrated a good understanding of the material.'
+                  : 'Keep practicing! You&apos;re making progress.'}
               </p>
             </div>
 

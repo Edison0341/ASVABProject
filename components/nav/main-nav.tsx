@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { User } from '@supabase/supabase-js'
 
 interface Category {
   id: string
@@ -22,7 +23,7 @@ interface Category {
 }
 
 export function MainNav() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
